@@ -2,3 +2,5 @@
 /Phys51_Sp24/credentials.py
 **/Data
 **/Data-backups
+**/.idea
+*.xml
