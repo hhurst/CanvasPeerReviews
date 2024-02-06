@@ -854,7 +854,7 @@ def getReviews(creations):
 				for creation in creations:
 					for assessment in rubric.assessments:
 						if ((assessment['assessment_type']=='grading' or assessment['assessment_type']=='peer_review') and creation.id == assessment['artifact_id'] ):
-							review=Review(assessment, creation, graded_assignments[creation.assignment_id].rubric)
+							review=Review(assessment, creation, graded_assignments[creation.assignment_id].rubric, graded_assignments[creation.assignment_id])
 							reviewsById[review.id]=review
 							try:
 								reviewer=studentsById[assessment['assessor_id']]						
@@ -1911,13 +1911,8 @@ def getParameters(ignoreFile=False, selectedAssignment="all"):
 				print("")
 				for criteria in assignment.rubric:
 					criteriaDescription[criteria['description']]=criteria['description']
-<<<<<<< Updated upstream
 					if not criteria['description'] in params.multiplier or (selectedAssignment==assignment):
 						params.multiplier[criteria['description']]=getNum("How many points (out of 100) should\n\t" +criteria['description'] + "\nbe worth? ",limits=[0,100], fileDescriptor=logFile)
-=======
-					if not criteria['id'] in params.multiplier or (selectedAssignment==assignment):
-						params.multiplier[criteria['id']]=getNum("How many points (out of 100) should\n\t" +criteria['description'] + "\nbe worth? ",limits=[0,100], fileDescriptor=logFile)
->>>>>>> Stashed changes
 						#val=float(input("\nHow many points (out of 100) should\n\t" +criteria['description'] + "\nbe worth? "))
 						#params.multiplier[criteria['description']]=val
 						#logFile.write(How many points (out of 100) should\n\t" +criteria['description'] + "\nbe worth?: " + str(val))

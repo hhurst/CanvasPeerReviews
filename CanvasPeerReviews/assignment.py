@@ -116,17 +116,10 @@ class GradedAssignment:
 		total=0
 		cnt=0
 		for criteria in self.rubric:
-<<<<<<< Updated upstream
-			if "description" in criteria:
-				total+=criteria['points']
-				cnt+=1
-				if criteria['description'] == cid:
-=======
 			if "id" in criteria or "description" in criteria:
 				total+=criteria['points']
 				cnt+=1
 				if criteria['id'] == cid or criteria['description']==cid:
->>>>>>> Stashed changes
 					return criteria['points']
 			else:
 				if cid == None:

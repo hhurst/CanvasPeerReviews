@@ -3,7 +3,7 @@ class Review:
 	# by the canvasapi.  It includes (among other things) the creation being reviewed, information about
 	# which assignment it was submitted to, who the reviewer was, and who the author
 	# of the creation was.  
-	def __init__(self, assessment, creation, rubric_outcomes):
+	def __init__(self, assessment, creation, rubric_outcomes, thisAssignment=None):
 		self.creation=creation
 		self.assessment=assessment
 		self.review_type=assessment['assessment_type']
@@ -26,12 +26,9 @@ class Review:
 		self.minimumRequiredCommentLength=2
 		self.urls=[]
 		
-		thisAssignment=graded_assignments[creation.assignment_id]
 		self.descriptionFromId=dict()
 		for criteria in thisAssignment.rubric:
 			self.descriptionFromId[criteria['id']]=criteria['description']
-		
-		self.tr
 		
 		try:
 			for attachment in self.creation.attachments:
@@ -46,13 +43,10 @@ class Review:
 			try:
 				#self.scores[s['criterion_id']]=s['points']
 				#self.comments[s['criterion_id']]=s['comments']
-<<<<<<< Updated upstream
-				self.scores[s['cid']]=s['points']
-				self.comments[s['cid']]=s['comments']
-=======
+				#self.scores[s['cid']]=s['points']
+				#self.comments[s['cid']]=s['comments']
 				self.scores[self.descriptionFromId[s['description']]]=s['points']
 				self.comments[self.descriptionFromId[s['description']]]=s['comments']
->>>>>>> Stashed changes
 			except:
 				err="Unscored criteria"
 
