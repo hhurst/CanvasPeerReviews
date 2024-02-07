@@ -818,7 +818,8 @@ def reviewSummary(assessment, display=False):
 	msg=""
 	#get comments on each learning outcome
 	for d in assessment.data:
-		msg+="\t" + criteriaDescription[d['description']] 
+		# got an error here on next line
+		msg+="\t" + criteriaDescription[d['cid']] 
 		try:
 			msg+=" [" + str(d['points']) + "]"
 		except Exception:
