@@ -1,4 +1,5 @@
 #################  Set up where to the environment  #################
+from credentials import *
 from path_info import * 			# Set up where to find the relevant files
 from CanvasPeerReviews import *		# the main module for managing peer reviews
 

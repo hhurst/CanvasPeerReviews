@@ -48,47 +48,51 @@ for criteria in activeAssignment.rubric:
 rubrics=course.get_rubrics()
 incompleteReviewCount=0
 resetReviewCount=0
-# for rubric in rubrics:
-if True:
-	rubric = rubrics[1]  # Hard reset to use the later rubric defined in Canvas.
-	rubric=course.get_rubric(rubric.id,include='assessments', style='full')
-	if hasattr(rubric, 'assessments'):
-		for assessment in rubric.assessments:
-			for d in assessment['data']:
-				try:
-					temp=d['points']
-				except:
-					print("error")
-					de=d
-					ae=assessment
-					reviewerID=ae['assessor_id']
-					reviewer=studentsById[reviewerID]
-					#listOfAuthorNames=[studentsById[c.author_id].name for c in creations if c.id==ae['artifact_id']]
-					listOfAuthorNames=[studentsById[creationsById[ae['artifact_id']].author_id].name]
-					if len(listOfAuthorNames)>0:
-						authorName=listOfAuthorNames[0]
-						print("Incomplete review of " + authorName +" by " + reviewer.name)
-						msg="Hi "+reviewer.name.split(" ")[0]+",  I  noticed one of your reviews was incomplete - likely because you hit 'save' before entering all of the data.  Since Canvas doesn't have a way to go back and finish a 'saved' review, I have deleted it and reassigned it so you can submit a complete review.  Here is what you had entered initially:\n\n"
-						msg+=reviewSummary(ae)
-						print(msg)
-						val=input("(r) reset review or (i) ignore incomplete review: ")
-						incompleteReviewCount+=1
-						if (val=='r'):
-							try:
-								#find the creation that has a failed review
-								c1=[c for c in creations if c.id == ae['artifact_id']][0]
-								#delete the failed review
-								c1.delete_submission_peer_review(reviewerID)
-								#reassign the review
-								c1.create_submission_peer_review(reviewerID)
-								# need to send a message with text msg
-								canvas.create_conversation(recipients=str(reviewerID), body=msg, subject='Incomplete peer review')
-								resetReviewCount+=1
-							except:
-								print('Unable to find assessment for this assignment.')
-						break
-					else:
-						print("Incomplete review found but don't know the author of creation with id " + str(ae['artifact_id']))
+#rubric=activeAssignment.rubric
+for rubric in rubrics:
+	if rubric.title == activeAssignment.rubric_settings['title']:
+		print("Using rubric: " + rubric.title )
+		break
+else:
+	exit("Unable to find the rubric to use")
+
+rubric=course.get_rubric(rubric.id,include='assessments', style='full')
+if hasattr(rubric, 'assessments'):
+	for assessment in rubric.assessments:
+		for d in assessment['data']:
+			try:
+				temp=d['points']
+			except:
+				print("error")
+				de=d
+				ae=assessment
+				reviewerID=ae['assessor_id']
+				reviewer=studentsById[reviewerID]
+				#listOfAuthorNames=[studentsById[c.author_id].name for c in creations if c.id==ae['artifact_id']]
+				listOfAuthorNames=[studentsById[creationsById[ae['artifact_id']].author_id].name]
+				if len(listOfAuthorNames)>0:
+					authorName=listOfAuthorNames[0]
+					print("Incomplete review of " + authorName +" by " + reviewer.name)
+					msg="Hi "+reviewer.name.split(" ")[0]+",  I  noticed one of your reviews was incomplete - likely because you hit 'save' before entering all of the data.  Since Canvas doesn't have a way to go back and finish a 'saved' review, I have deleted it and reassigned it so you can submit a complete review.  Here is what you had entered initially:\n\n"
+					msg+=reviewSummary(ae)
+					print(msg)
+					val=input("(r) reset review or (i) ignore incomplete review: ")
+					incompleteReviewCount+=1
+					if (val=='r'):
+						#find the creation that has a failed review
+						c1=[c for c in creations if c.id == ae['artifact_id']][0]
+						#delete the failed review
+						c1.delete_submission_peer_review(reviewerID)
+						#reassign the review
+						c1.create_submission_peer_review(reviewerID)
+						# need to send a message with text msg
+						canvas.create_conversation(recipients=str(reviewerID), body=msg, subject='Incomplete peer review')
+						resetReviewCount+=1
+					break
+				else:
+					print("Incomplete review found but don't know the author of creation with id " + 
+					
+str(ae['artifact_id']))
 if incompleteReviewCount==0:
 	print("No incomplete reviews found")
 elif resetReviewCount>0:
