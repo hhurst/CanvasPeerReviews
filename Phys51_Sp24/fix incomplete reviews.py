@@ -48,7 +48,9 @@ for criteria in activeAssignment.rubric:
 rubrics=course.get_rubrics()
 incompleteReviewCount=0
 resetReviewCount=0
-for rubric in rubrics:
+# for rubric in rubrics:
+if True:
+	rubric = rubrics[1]  # Hard reset to use the later rubric defined in Canvas.
 	rubric=course.get_rubric(rubric.id,include='assessments', style='full')
 	if hasattr(rubric, 'assessments'):
 		for assessment in rubric.assessments:
@@ -72,15 +74,18 @@ for rubric in rubrics:
 						val=input("(r) reset review or (i) ignore incomplete review: ")
 						incompleteReviewCount+=1
 						if (val=='r'):
-							#find the creation that has a failed review
-							c1=[c for c in creations if c.id == ae['artifact_id']][0]
-							#delete the failed review
-							c1.delete_submission_peer_review(reviewerID)
-							#reassign the review
-							c1.create_submission_peer_review(reviewerID)
-							# need to send a message with text msg
-							canvas.create_conversation(recipients=str(reviewerID), body=msg, subject='Incomplete peer review')
-							resetReviewCount+=1
+							try:
+								#find the creation that has a failed review
+								c1=[c for c in creations if c.id == ae['artifact_id']][0]
+								#delete the failed review
+								c1.delete_submission_peer_review(reviewerID)
+								#reassign the review
+								c1.create_submission_peer_review(reviewerID)
+								# need to send a message with text msg
+								canvas.create_conversation(recipients=str(reviewerID), body=msg, subject='Incomplete peer review')
+								resetReviewCount+=1
+							except:
+								print('Unable to find assessment for this assignment.')
 						break
 					else:
 						print("Incomplete review found but don't know the author of creation with id " + str(ae['artifact_id']))
