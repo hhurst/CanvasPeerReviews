@@ -15,7 +15,7 @@ for s in students:
 for key in graded_assignments:
 	ga=graded_assignments[key]
 	#if key != 'last' and ga.secondsPastDue()>0 and ga.published and ga.graded:
-	if ga.published ga.secondsPastDue()>0:
+	if ga.published and ga.secondsPastDue()>0:
 		print(f"Getting work on {ga.name}")
 		getStudentWork(ga)
 		cs=[c for c in creations if c.author_id in studentsById] # don't consider any submission by students we don't know about
