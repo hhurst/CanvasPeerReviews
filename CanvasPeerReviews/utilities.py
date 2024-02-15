@@ -848,49 +848,54 @@ def getReviews(creations):
 	global course, reviewsById, allReviews
 	rubrics=course.get_rubrics()
 	allReviews=[]
+		
 	for rubric in rubrics:
-		try:
-			rubric=course.get_rubric(rubric.id,include='assessments', style='full')
-			if hasattr(rubric, 'assessments'):
-				for creation in creations:
-					for assessment in rubric.assessments:
-						if ((assessment['assessment_type']=='grading' or assessment['assessment_type']=='peer_review') and creation.id == assessment['artifact_id'] ):
-							review=Review(assessment, creation, graded_assignments[creation.assignment_id].rubric, graded_assignments[creation.assignment_id])
-							reviewsById[review.id]=review
-							try:
-								reviewer=studentsById[assessment['assessor_id']]						
-								for pr in reviewer.assignedReviews(creation.assignment_id):
-									if review.author_id==pr.user_id:
-										review.peer_review=pr
-							except Exception:
-								pass
-								#print(f"Student with id {assessment['assessor_id']} not in list of students")
-							alreadyProcessed = any(thisReview.fingerprint() == review.fingerprint() for thisReview in studentsById[creation.user_id].reviewsReceived)
-							if not alreadyProcessed:
-								studentsById[creation.user_id].reviewsReceived.append(review)
-							else: 
-								pass
-							if creation.assignment_id in studentsById[creation.user_id].regrade: # replace entry
-								for i,thisReview in enumerate(studentsById[creation.user_id].reviewsReceived):
-									if thisReview.fingerprint() == review.fingerprint() and assessment['assessment_type']=="grading":
-										studentsById[creation.user_id].reviewsReceived[i]=review			
-							if creation.id in reviewsByCreationId:
-								#reviewsByCreationId[creation.id].append(review)
-								reviewsByCreationId[creation.id][review.id]=review
-							else:
-								reviewsByCreationId[creation.id]={review.id: review}
-							if assessment['assessment_type']=='grading':
-								if creation.assignment_id in professorsReviews:
-									if review.fingerprint() not in [pr.fingerprint() for pr in professorsReviews[creation.assignment_id]]:
-										professorsReviews[creation.assignment_id].append(review)
-								else:
-									professorsReviews[creation.assignment_id]=[review]
-							elif review.reviewer_id in studentsById:
-								# if not already assigned assignment.multiplier[cid]
-								studentsById[review.reviewer_id].reviewsGiven[review.submission_id]=review
-							allReviews.append(review)
-		except:
-			print(f"Unable to get {rubric.title} for this assignment.  Skipping...")
+		if rubric.title == graded_assignments[creations[0].assignment_id].rubric_settings['title']:
+			break
+			
+	rubric=course.get_rubric(rubric.id,include='assessments', style='full')
+	
+	
+	try:
+		for creation in creations:
+			for assessment in rubric.assessments:
+				if ((assessment['assessment_type']=='grading' or assessment['assessment_type']=='peer_review') and creation.id == assessment['artifact_id'] ):
+					review=Review(assessment, creation, graded_assignments[creation.assignment_id].rubric, graded_assignments[creation.assignment_id])
+					reviewsById[review.id]=review
+					try:
+						reviewer=studentsById[assessment['assessor_id']]						
+						for pr in reviewer.assignedReviews(creation.assignment_id):
+							if review.author_id==pr.user_id:
+								review.peer_review=pr
+					except Exception:
+						pass
+						#print(f"Student with id {assessment['assessor_id']} not in list of students")
+					alreadyProcessed = any(thisReview.fingerprint() == review.fingerprint() for thisReview in studentsById[creation.user_id].reviewsReceived)
+					if not alreadyProcessed:
+						studentsById[creation.user_id].reviewsReceived.append(review)
+					else: 
+						pass
+					if creation.assignment_id in studentsById[creation.user_id].regrade: # replace entry
+						for i,thisReview in enumerate(studentsById[creation.user_id].reviewsReceived):
+							if thisReview.fingerprint() == review.fingerprint() and assessment['assessment_type']=="grading":
+								studentsById[creation.user_id].reviewsReceived[i]=review			
+					if creation.id in reviewsByCreationId:
+						#reviewsByCreationId[creation.id].append(review)
+						reviewsByCreationId[creation.id][review.id]=review
+					else:
+						reviewsByCreationId[creation.id]={review.id: review}
+					if assessment['assessment_type']=='grading':
+						if creation.assignment_id in professorsReviews:
+							if review.fingerprint() not in [pr.fingerprint() for pr in professorsReviews[creation.assignment_id]]:
+								professorsReviews[creation.assignment_id].append(review)
+						else:
+							professorsReviews[creation.assignment_id]=[review]
+					elif review.reviewer_id in studentsById:
+						# if not already assigned assignment.multiplier[cid]
+						studentsById[review.reviewer_id].reviewsGiven[review.submission_id]=review
+					allReviews.append(review)
+	except:
+		print(f"Unable to get {rubric.title} for this assignment.  Skipping...")
 	#create the comparison objects for each student
 	for student in students:
 		for key,thisGivenReview in student.reviewsGiven.items():
@@ -1284,7 +1289,9 @@ def gradeStudent(assignment, student, reviewScoreGrading="default"):
 		student.gradingExplanation+=str(criteriaDescription[cid]) + ":\n"
 		gradingExplanationLine=""
 		multiplier=params.pointsForCid(cid, assignment)
-		for review in student.reviewsReceived:
+		for i,review in enumerate(student.reviewsReceived):
+			review=reviewsById[review.id]
+			student.reviewsReceived[i]=reviewsById[review.id]
 			if review.assignment_id == assignment.id:
 				weight=0
 				creationWasReviewed=True
@@ -1605,6 +1612,8 @@ def regrade(assignmentList="all", studentsToGrade="All", recalibrate=False):
 												printLine(student.name + " has a new recalculation request pending")										
 						except KeyboardInterrupt:
 							exit()
+						except:
+							pass
 			printLine("",newLine=False)
 		else:
 			for student in makeList(studentsToGrade):
